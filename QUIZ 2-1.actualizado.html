@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>QUIZ 2-1 ACTUALIZADO</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #info {
+            position: absolute;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            color: #FFFFFF;
+        }
+
+        h2 {
+            color: crimson
+        }
+    </style>
+</head>
+
+<body>
+    <div id="info">
+        <h2>EJERCICIO 3.4</h2>
+
+        Universidad Militar Nueva granada<br />
+        Hector Murcia <br />
+
+        ﴾ Use la flecha arriba ▲ para realizar paso a paso el ejercicio 3.4 ﴿<br />
+    </div>
+
+
+    <script src="js/three.min.js"></script>
+    <script>
+        var scene, aspect, camera, renderer;
+        var startTime = Date.now();
+        var pressed = false;
+        var upArrow = false;
+        var esfer;
+        var tempMatrix;
+        var flag = 0;
+        init();
+        animate();
+
+
+        function init() {
+            
+            
+            //ESCENA 
+            
+            scene = new THREE.Scene();
+            
+            //ASPECTO
+            
+            aspect = window.innerWidth / window.innerHeight;
+            
+            //CAMARA
+
+            camera = new THREE.PerspectiveCamera(30, aspect, 0.1, 1000);
+            
+            //RENDER
+            
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            //EVENTOS DE TECLADO(EVENT KEYCODE)
+
+            //Códigos de las teclas: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+            
+            var onKeyDown = function(event) {
+                switch (event.keyCode) {
+                    case 38: // TRASLADAR EN DIRECCION POSITIVA
+                        upArrow = true;
+                        break;
+                }
+            };
+
+            var onKeyUp = function(event) {
+                switch (event.keyCode) {
+                    case 38: // TRASLADAR EN DIRECCION POSITIVA
+                        pressed = false;
+                        upArrow = false;
+                        break;
+                }
+            };
+
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+
+            //ELEMENTOS DE ESCENA
+            
+            var size = 10;
+            var arrowSize = 3;
+            var divisions = size;
+            var origin = new THREE.Vector3(0, 0, 0);
+            var x = new THREE.Vector3(1, 0, 0);
+            var y = new THREE.Vector3(0, 1, 0);
+            var z = new THREE.Vector3(0, 0, 1);
+            
+            //cCOLOR DE GRILLAS 
+            
+            var color1 = new THREE.Color("rgb(255, 255, 255)"); //grillas color blanco
+            var color2 = new THREE.Color("rgb(255, 255, 255)"); //grillas color blanco
+            
+            
+            //COLOR DE LOS EJES
+
+            var colorB = new THREE.Color("rgb(255, 61, 103)"); //color rojo eje x
+            var colorV = new THREE.Color("rgb(61, 255, 100)"); //color verde eje y
+            var colorO = new THREE.Color("rgb(61, 145, 255)"); //color azul eje z
+
+            //CREAR LAS GRILLAS PARA EL ESCENARIO
+            
+            var axesHelper = new THREE.AxesHelper(size);
+            var gridHelperXY = new THREE.GridHelper(size, divisions, color1, color1);
+            var gridHelperXZ = new THREE.GridHelper(size, divisions, color2, color2);
+            var gridHelperYZ = new THREE.GridHelper(size, divisions, color2, color2);
+
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            
+            gridHelperXY.rotateOnWorldAxis(x, THREE.Math.degToRad(90));
+            gridHelperXZ.rotateOnWorldAxis(y, THREE.Math.degToRad(90));
+            gridHelperYZ.rotateOnWorldAxis(z, THREE.Math.degToRad(90));
+
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            
+            var arrowX = new THREE.AxesHelper(7); //construimos la flecha del eje x color aguamarina
+            var arrowY = new THREE.AxesHelper(7); //construimos la flecha del eje y color morado
+            var arrowZ = new THREE.AxesHelper(7); //construimos la flecha del eje z color amarillo
+
+            //CREAR LAS GEOMETRÍAS
+            
+            var geometry = new THREE.SphereGeometry(1, 32, 32);
+
+            //CREAR LOS MATERIALES
+            
+            var material = new THREE.MeshNormalMaterial({
+                color: color1,
+                vertexColors: THREE.FaceColors
+
+            });
+
+
+            //CREAR LOS OBJETOS
+
+            esfer = new THREE.Mesh(geometry, material);
+
+            esfer.matrixAutoUpdate = false;
+
+            //AGREGAR A LA ESCENA
+            
+            scene.add(gridHelperXZ);
+            scene.add(arrowX);
+            scene.add(arrowY);
+            scene.add(arrowZ);
+            scene.add(esfer);
+
+            //MOVER LA CÁMARA
+            
+            camera.position.x = 3; //-7 -3 -15
+            camera.position.y = 7; //8 8 10
+            camera.position.z = 15; //17 -7
+            camera.lookAt(origin);
+
+            renderer.render(scene, camera);
+        }
+
+        function animate() {
+            render();
+            requestAnimationFrame(animate);
+        }
+
+        function render() {
+            var dtime = Date.now() - startTime;
+            var tx = 0,
+                ty = 0,
+                tz = 0;
+            if (upArrow && !pressed) {
+                pressed = true;
+                switch (flag) {
+                    case 0:
+                        flag = 1;
+                        esfer.applyMatrix(new THREE.Matrix4().makeScale(0.5, 1, 1));
+                        break;
+                    case 1:
+                        flag = 2;
+                        esfer.applyMatrix(new THREE.Matrix4().makeScale(1, 0.5, 1));
+                        break;
+                    case 2:
+                        flag = 3;
+                        esfer.applyMatrix(new THREE.Matrix4().makeScale(1, 1, 3));
+                        break;
+                    case 3:
+                        flag = 4;
+                        esfer.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, -3));
+                        break;
+                    case 4:
+                        flag = 5;
+                        esfer.applyMatrix(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                        break;
+                    case 5:
+                        flag = 6;
+                        esfer.applyMatrix(new THREE.Matrix4().makeRotationY(-Math.PI / 4));
+                        break;
+                    case 6:
+                        flag = 7;
+                        esfer.applyMatrix(new THREE.Matrix4().makeRotationZ(Math.PI / 4));
+                        break;
+                }
+
+                camera.lookAt(0, 0, 0);
+                renderer.render(scene, camera);
+            }
+        }
+    </script>
+</body>
+
+</html>
